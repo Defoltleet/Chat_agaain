@@ -1,0 +1,66 @@
+ class Client
+    {
+        Socket tr;
+        public Client(Socket soc)
+        {
+            tr = soc;
+           // Container container = new Container();
+            List<object> ob = new List<object>();
+            Thread tred = new Thread(Rec);
+            //container.Add(tred);
+            tred.Start();
+            ob.Add(tred);
+        }
+        //   Meth ob = new Meth();
+        public void Rec()
+        {
+            StringBuilder mes = new StringBuilder();
+            //Thread tred = new Thread(Rec);
+           // tred.Start();
+            int count = 0;
+            Queue<string> queue = new Queue<string>();
+            byte[] message = new byte[256];
+            while (true)
+            {
+                do
+                {
+                    count = tr.Receive(message);
+                    mes.Append(Encoding.Unicode.GetString(message, 0, count));
+                } while (tr.Available > 0);
+             //   queue.Enqueue(mes.ToString());
+                if (mes.ToString() == "/exit")
+                {
+                    tr.Shutdown(SocketShutdown.Both);
+                    tr.Close();
+                }
+                else
+                {
+                    queue.Enqueue(mes.ToString());
+                    Console.WriteLine(DateTime.Now.ToLongTimeString() + ": " + queue.Dequeue());
+        }
+     }   
+      class Meth
+    {
+        const string adr = "127.0.0.1"; // я ничего не понял...
+        const int port = 8888; // ... так что пусть будет такой ip
+        static void Main(string[] args)
+        {
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(adr), port);
+            Socket sokc = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                sokc.Bind(ip);
+                sokc.Listen(10);
+                Console.WriteLine("Ожидание подключения...");
+                for (;;)
+                {
+                    Socket catcher = sokc.Accept();
+                    Client cl = new Client(catcher);
+                    List<object> clients = new List<object>();
+                    clients.Add(cl);
+                }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }   
